@@ -14,7 +14,7 @@ from vtxmpasmeshes.mpas_plots import view_resolution_map, \
     view_mpas_regional_mesh
 from vtxmpasmeshes.dataset_utilities import distance_latlon_matrix
 
-PATH_LIMITED_AREA = '/home/marta/PycharmProjects/MPAS-Limited-Area'
+PATH_LIMITED_AREA = '/mnt/sda4/home/gerard/PycharmProjects/MPAS-Limited-Area'
 
 
 def apply_resolution_at_distance(distances, ref_points, ref_resolutions):
@@ -125,98 +125,7 @@ def variable_resolution_latlonmap(grid, **kwargs):
     print('\tComputing resolutions using technique %s' % grid)
 
     if grid == 'doughnut':
-        dists, resol, kwargs = doughnut_variable_resolution(
-            **{'highresolution': 1}
-        )
-        ds['resolution'] = apply_resolution_at_distance(
-            ds['distance'], ref_points=dists, ref_resolutions=resol)
-    else:
-        raise ValueError('!! Grid %s not implemented.' % grid)
-
-    ds.attrs = kwargs
-
-    return ds
-
-
-def variable_resolution_latlonmap_beta(grid, **kwargs):
-
-    print('\n>> Creating a variable resolution map')
-
-    # GRID
-    # Create a global lat/lon grid at high resolution
-    lowresolution = kwargs.get('lowresolution', 20.)
-    highresolution = kwargs.get('highresolution', 10.)  # grid size in km
-    print('\tInner resolution km of lat/lon grid: %.1f' % highresolution,
-          '\tOuter resolution km of lat/lon grid: %.1f' % lowresolution)
-
-    dist_degrees_inner = highresolution / 110.
-    dist_degrees_outer = lowresolution / 110.
-
-    nlat_in = int(int(180. / dist_degrees_inner) + 1 / 2)
-    nlon_in = int(int(360. / dist_degrees_inner) + 1 / 2)
-
-    nlat_out = int(int(180. / dist_degrees_outer) + 1 / 4)
-    nlon_out = int(int(360. / dist_degrees_outer) + 1 / 4)
-
-
-    def gaussian_filter(lat_size, lon_size, sigma=1, muu=0):
-
-        # Initializing value of x,y as grid of kernel size
-        # in the range of kernel size
-
-        lat, lon = np.meshgrid(np.linspace(-90., 90., lat_size),
-                               np.linspace(-180., 180., lon_size))
-        dst = np.sqrt(lat ** 2 + lon ** 2)
-
-        # lower normal part of gaussian
-        normal = 1 / np.sqrt(2 * np.pi * sigma ** 2)
-
-        # Calculating Gaussian filter
-        gauss = np.exp(-((dst - muu) ** 2 / (2.0 * sigma ** 2))) * normal
-
-        return gauss
-
-
-    lat_size, lon_size = 6000, 14000
-    gaussian = gaussian_filter(lat_size=lat_size, lon_size=lon_size)
-    print(gaussian)
-    exit()
-    ds = xr.Dataset(
-        coords={
-            'lat': np.concatenate([np.linspace(-90., -45., nlat_out),
-                                   np.linspace(-45., 45., nlat_in),
-                                   np.linspace(45., 90., nlon_out)]),
-            'lon': np.concatenate([np.linspace(-180., -90., nlon_out),
-                                   np.linspace(-90., 90., nlon_in),
-                                   np.linspace(90., 180., nlon_out)])
-
-        }
-    )
-
-    # DISTANCE
-    # Compute distance from each point to the reference point
-
-    lat_ref = kwargs.get('lat_ref', None)
-    if lat_ref is None:
-        lat_ref = 0.
-    lon_ref = kwargs.get('lon_ref', None)
-    if lon_ref is None:
-        lon_ref = 0.
-    kwargs.update({'lat_ref': lat_ref, 'lon_ref': lon_ref})
-
-    print('\tComputing the distance to the reference point '
-          '(%.2f, %.2f)' % (lat_ref, lon_ref))
-    dists = distance_latlon_matrix(ds.coords['lat'], ds.coords['lon'],
-                                   lat_ref=lat_ref, lon_ref=lon_ref,
-                                   do_tile=True)
-
-    ds['distance'] = xr.DataArray(data=dists, dims=('lat', 'lon'))
-
-    # RESOLUTION
-    # Set the resolution value at each point
-    print('\tComputing resolutions using technique %s' % grid)
-
-    if grid == 'doughnut':
+        kwargs.update({'highresolution': 1.})
         dists, resol, kwargs = doughnut_variable_resolution(**kwargs)
         ds['resolution'] = apply_resolution_at_distance(
             ds['distance'], ref_points=dists, ref_resolutions=resol)
@@ -271,7 +180,7 @@ def cut_circular_region(mpas_global_file,
                       'correct. Pass it to the function '
                       'cut_circular_region_beta or define a correct '
                       'default in variable PATH_LIMITED_AREA (in '
-                      'mesh_generator.py.')
+                      'mesh_generator.py).')
 
     print('\n>> Cutting a circular region')
     print('\t centered at %.4f, %.4f' % (lat_cen, lon_cen))
@@ -337,7 +246,7 @@ def cut_circular_region_beta(mpas_global_file,
                       'correct. Pass it to the function '
                       'cut_circular_region_beta or define a correct '
                       'default in variable PATH_LIMITED_AREA (in '
-                      'mesh_generator.py.')
+                      'mesh_generator.py).')
 
     create_region_exec = path_create_region + '/create_region_no_file'
     if not os.path.isfile(create_region_exec):
