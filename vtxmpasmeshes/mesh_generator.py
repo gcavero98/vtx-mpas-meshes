@@ -14,7 +14,8 @@ from vtxmpasmeshes.mpas_plots import view_resolution_map, \
     view_mpas_regional_mesh
 from vtxmpasmeshes.dataset_utilities import distance_latlon_matrix
 
-PATH_LIMITED_AREA = '/mnt/sda4/home/gerard/PycharmProjects/MPAS-Limited-Area'
+PATH_LIMITED_AREA = '/home/gcavero/PycharmProjects/MPAS-Limited-Area'
+# /mnt/std4/home/gerard/PycharmProjects/MPAS-Limited-Area
 
 
 def apply_resolution_at_distance(distances, ref_points, ref_resolutions):
@@ -86,10 +87,12 @@ def variable_resolution_latlonmap(grid, **kwargs):
     # GRID
     # Create a global lat/lon grid at high resolution
 
-    highresolution = kwargs.get('highresolution', 10.)  # grid size in km
-    print('\tResolution in km of lat/lon grid: %.1f' % highresolution)
+    resolutionlatlonarray = kwargs.get('highresolution', 10.)  # grid size in km
+    if resolutionlatlonarray < 3:
+        resolutionlatlonarray = 3.0
+    print('\tResolution in km of lat/lon grid: %.1f' % resolutionlatlonarray)
 
-    dist_degrees = highresolution / 110.
+    dist_degrees = resolutionlatlonarray / 110.
 
     nlat = int(180. / dist_degrees) + 1
     nlon = int(360. / dist_degrees) + 1
@@ -125,7 +128,6 @@ def variable_resolution_latlonmap(grid, **kwargs):
     print('\tComputing resolutions using technique %s' % grid)
 
     if grid == 'doughnut':
-        kwargs.update({'highresolution': 1.})
         dists, resol, kwargs = doughnut_variable_resolution(**kwargs)
         ds['resolution'] = apply_resolution_at_distance(
             ds['distance'], ref_points=dists, ref_resolutions=resol)
@@ -323,7 +325,7 @@ def full_generation_process(mpas_grid_file, grid, redo=True,
         view_resolution_map(resolution_ds,
                             pdfname=path_save + '/resolution.pdf',
                             list_distances=[
-                                #1000,
+                                # 1000,
                                 500, border, radius])
         duration_plots = time.time() - start_time
         print(' .. finished doing resolution plots: %.3fs\n\n' % duration_plots)

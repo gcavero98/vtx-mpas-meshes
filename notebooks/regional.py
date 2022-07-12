@@ -9,8 +9,8 @@ from vtxmpasmeshes.mesh_generator import variable_resolution_latlonmap
 
 # define grid type and the desired mesh info
 grid = 'doughnut'
-test = {'highresolution': 3, 'lowresolution': 20, 'size': 30,
-        'margin': 80, 'lat_ref': 40., 'lon_ref': 0.}
+test = {'highresolution': 1, 'lowresolution': 20, 'size': 20,
+        'margin': 125, 'lat_ref': 40., 'lon_ref': 0.}
 
 # we generate an Xarray Dataset containing, for each lat, lon point,
 # the distance to a reference point and the corresponding resolution
@@ -38,8 +38,6 @@ if not os.path.exists(global_grid):
     global_grid, graph_info = get_mesh_from_resolution(
         resolution_ds=latlon_map, basename=f'{tmp_dir}/mesh'
     )
-
-grid = xr.open_dataset(global_grid)
 
 # In[4]:
 
@@ -71,9 +69,7 @@ from vtxmpasmeshes.mpas_plots import view_mpas_regional_mesh
 view_mpas_regional_mesh(mpas_grid_file=f'grids/{regional_grid}',
                         do_plot_resolution_rings=False,
                         do_plot_era5_grid=True,
-                        do_plot_wrf_grid=False,
-                        **{'vmax': 3})
-exit()
+                        do_plot_wrf_grid=False)
 # In[6]:
 
 
@@ -85,7 +81,7 @@ num_boundary_layers = 8
 
 for name, value in latlon_map.attrs.items():
     regional_ds.attrs['vtx-param-' + str(name)] = value
-print(regional_ds)
+
 regional_ds.attrs['vtx-region-num_boundary_layers'] = num_boundary_layers
 lowres = latlon_map.attrs['lowresolution']
 radius = latlon_map.attrs['radius']
@@ -104,10 +100,4 @@ print(regional_ds)
 latlon_map = view_mpas_regional_mesh(mpas_grid_file=f'grids/{regional_grid_2}',
                                      do_plot_resolution_rings=True,
                                      do_plot_era5_grid=True,
-                                     do_plot_wrf_grid=True,
-                                     **{'vmax': 7.})
-
-
-
-
-
+                                     do_plot_wrf_grid=True)
